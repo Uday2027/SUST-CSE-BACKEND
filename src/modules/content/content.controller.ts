@@ -1,0 +1,50 @@
+import { Request, Response } from 'express';
+import { asyncHandler } from '@/utils/asyncHandler.util';
+import { successResponse } from '@/utils/response.util';
+import * as ContentService from './content.service';
+
+// HomePage
+export const getHomePage = asyncHandler(async (req: Request, res: Response) => {
+  const result = await ContentService.getHomePage();
+  successResponse(res, result, 'Homepage data fetched successfully');
+});
+
+export const updateHomePage = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await ContentService.updateHomePage(req.body, req.file, userId);
+  successResponse(res, result, 'Homepage updated successfully');
+});
+
+// Notices
+export const createNotice = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await ContentService.createNotice(req.body, (req.files as Express.Multer.File[]) || [], userId);
+  successResponse(res, result, 'Notice created successfully', 201);
+});
+
+export const getNotices = asyncHandler(async (req: Request, res: Response) => {
+  const result = await ContentService.getAllNotices(req.query);
+  successResponse(res, result, 'Notices fetched successfully');
+});
+
+export const deleteNotice = asyncHandler(async (req: Request, res: Response) => {
+  await ContentService.deleteNotice(req.params.id);
+  successResponse(res, null, 'Notice deleted successfully');
+});
+
+// Achievements
+export const createAchievement = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await ContentService.createAchievement(req.body, (req.files as Express.Multer.File[]) || [], userId);
+  successResponse(res, result, 'Achievement created successfully', 201);
+});
+
+export const getAchievements = asyncHandler(async (req: Request, res: Response) => {
+  const result = await ContentService.getAllAchievements(req.query);
+  successResponse(res, result, 'Achievements fetched successfully');
+});
+
+export const deleteAchievement = asyncHandler(async (req: Request, res: Response) => {
+  await ContentService.deleteAchievement(req.params.id);
+  successResponse(res, null, 'Achievement deleted successfully');
+});
