@@ -1,0 +1,43 @@
+import { Request, Response } from 'express';
+import { asyncHandler } from '@/utils/asyncHandler.util';
+import { successResponse } from '@/utils/response.util';
+import * as SocietyService from './society.service';
+
+// Societies
+export const createSociety = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await SocietyService.createSociety(req.body, req.file as Express.Multer.File, userId);
+  successResponse(res, result, 'Society created successfully', 201);
+});
+
+export const getSocieties = asyncHandler(async (req: Request, res: Response) => {
+  const result = await SocietyService.getAllSocieties(req.query);
+  successResponse(res, result, 'Societies fetched successfully');
+});
+
+export const getSocietyById = asyncHandler(async (req: Request, res: Response) => {
+  const result = await SocietyService.getSocietyById(req.params.id);
+  successResponse(res, result, 'Society details fetched successfully');
+});
+
+// Members
+export const addMember = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await SocietyService.addMember(req.params.id, req.body, userId);
+  successResponse(res, result, 'Member added successfully', 201);
+});
+
+export const getMembers = asyncHandler(async (req: Request, res: Response) => {
+  const result = await SocietyService.getSocietyMembers(req.params.id, req.query);
+  successResponse(res, result, 'Society members fetched successfully');
+});
+
+export const updateMember = asyncHandler(async (req: Request, res: Response) => {
+  const result = await SocietyService.updateMember(req.params.memberId, req.body);
+  successResponse(res, result, 'Member record updated successfully');
+});
+
+export const removeMember = asyncHandler(async (req: Request, res: Response) => {
+  await SocietyService.removeMember(req.params.memberId);
+  successResponse(res, null, 'Member removed successfully');
+});

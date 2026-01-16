@@ -2,6 +2,7 @@ import express from 'express';
 import { AuthRoutes } from '@/modules/auth/auth.routes';
 import { ContentRoutes } from '@/modules/content/content.routes';
 import { EventRoutes } from '@/modules/event/event.routes';
+import { SocietyRoutes } from '@/modules/society/society.routes';
 
 const router = express.Router();
 
@@ -17,6 +18,10 @@ const moduleRoutes = [
   {
     path: '/events',
     route: EventRoutes,
+  },
+  {
+    path: '/society',
+    route: SocietyRoutes,
   },
 ];
 
