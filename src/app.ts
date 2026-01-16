@@ -27,6 +27,10 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+// API routes
+import router from './routes';
+app.use('/api', router);
+
 // Base route
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
