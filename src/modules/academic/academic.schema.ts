@@ -22,6 +22,11 @@ courseSchema.pre('find', function (this: Query<any, ICourse>, next) {
   next();
 });
 
+courseSchema.pre('findOne', function (this: Query<any, ICourse>, next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
+
 export const Course = model<ICourse>('Course', courseSchema);
 
 const academicAchievementSchema = new Schema<IAcademicAchievement>(
@@ -43,6 +48,11 @@ academicAchievementSchema.pre('find', function (this: Query<any, IAcademicAchiev
   next();
 });
 
+academicAchievementSchema.pre('findOne', function (this: Query<any, IAcademicAchievement>, next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
+
 export const AcademicAchievement = model<IAcademicAchievement>('AcademicAchievement', academicAchievementSchema);
 
 const academicStatSchema = new Schema<IAcademicStat>(
@@ -59,5 +69,10 @@ const academicStatSchema = new Schema<IAcademicStat>(
   },
   { timestamps: true }
 );
+
+academicStatSchema.pre('find', function (this: Query<any, IAcademicStat>, next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
 
 export const AcademicStat = model<IAcademicStat>('AcademicStat', academicStatSchema);

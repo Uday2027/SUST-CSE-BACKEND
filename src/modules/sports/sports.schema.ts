@@ -53,7 +53,6 @@ tournamentSchema.pre('findOne', function (this: Query<any, ITournament>, next) {
   next();
 });
 
-
 export const Tournament = model<ITournament>('Tournament', tournamentSchema);
 
 const playerShowcaseSchema = new Schema<IPlayerShowcase>(
@@ -85,6 +84,5 @@ playerShowcaseSchema.pre('findOne', function (this: Query<any, IPlayerShowcase>,
   this.where({ isDeleted: { $ne: true } });
   next();
 });
-
 
 export const PlayerShowcase = model<IPlayerShowcase>('PlayerShowcase', playerShowcaseSchema);
