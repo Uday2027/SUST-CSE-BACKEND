@@ -1,11 +1,15 @@
 import app from './app';
 import { env } from './config/env';
 import { connectDB } from './config/database';
+import { seedAdmin } from './utils/seedAdmin.util';
 
 const startServer = async () => {
   try {
     // 1. Connect to Database
     await connectDB();
+
+    // 2. Auto-seed Admin
+    await seedAdmin();
 
     // 2. Start Express Server
     const server = app.listen(env.PORT, () => {

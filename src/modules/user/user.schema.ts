@@ -118,3 +118,7 @@ const teacherSchema = new Schema<ITeacher>({
 });
 
 export const Teacher = User.discriminator('TEACHER', teacherSchema);
+
+// Admin Discriminator
+const adminSchema = new Schema<IUser>({});
+export const Admin = User.discriminator('ADMIN', adminSchema);
