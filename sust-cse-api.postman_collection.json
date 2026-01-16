@@ -1,180 +1,285 @@
 {
-	"info": {
-		"_postman_id": "sust-cse-backend-testing",
-		"name": "SUST CSE Department API",
-		"description": "Comprehensive API collection for SUST CSE Department Website Backend",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register Student",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"01700000000\",\n  \"studentId\": \"2019331001\",\n  \"batch\": \"2019-20\",\n  \"session\": \"2019-20\",\n  \"enrollmentYear\": 2019\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/auth/register-student",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"register-student"
-							]
-						}
-					}
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/auth/login",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Content Management",
-			"item": [
-				{
-					"name": "Get Home Page",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/content/home-page",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"content",
-								"home-page"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Academic",
-			"item": [
-				{
-					"name": "Get Courses",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/academic/courses",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"academic",
-								"courses"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Payment",
-			"item": [
-				{
-					"name": "Initiate Payment",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"amount\": 5000,\n  \"category\": \"SEMESTER_FEE\",\n  \"method\": \"BKASH\",\n  \"description\": \"1st Year 1st Semester Fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/payment/initiate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"payment",
-								"initiate"
-							]
-						}
-					}
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:5000/api",
-			"type": "string"
-		},
-		{
-			"key": "token",
-			"value": "your_jwt_token_here",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "sust-cse-backend-total",
+    "name": "SUST CSE Department API - TOTAL",
+    "description": "Total API collection for SUST CSE Department Website Backend with EVERY route and body.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Student Name\",\n  \"email\": \"student@sust.edu\",\n  \"password\": \"password123\",\n  \"phone\": \"01712345678\",\n  \"studentId\": \"2019331001\",\n  \"batch\": \"2019-20\",\n  \"session\": \"2019-20\",\n  \"enrollmentYear\": 2019\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register/student", "host": ["{{baseUrl}}"], "path": ["auth", "register", "student"] }
+          }
+        },
+        {
+          "name": "Register Teacher",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Teacher Name\",\n  \"email\": \"teacher@sust.edu\",\n  \"password\": \"password123\",\n  \"phone\": \"01787654321\",\n  \"employeeId\": \"TEA101\",\n  \"designation\": \"Professor\",\n  \"department\": \"Computer Science and Engineering\",\n  \"researchInterests\": [\"AI\", \"Machine Learning\"],\n  \"publications\": [\"Paper 1\", \"Paper 2\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register/teacher", "host": ["{{baseUrl}}"], "path": ["auth", "register", "teacher"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@sust.edu\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Content",
+      "item": [
+        {
+          "name": "Get Homepage",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/content/homepage", "host": ["{{baseUrl}}"], "path": ["content", "homepage"] }
+          }
+        },
+        {
+          "name": "Update Homepage",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "heroTitle", "value": "New Title", "type": "text" },
+                { "key": "heroSubtitle", "value": "New Subtitle", "type": "text" },
+                { "key": "heroImage", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/content/homepage", "host": ["{{baseUrl}}"], "path": ["content", "homepage"] }
+          }
+        },
+        {
+          "name": "Get Notices",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/content/notices", "host": ["{{baseUrl}}"], "path": ["content", "notices"] }
+          }
+        },
+        {
+          "name": "Create Notice",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Notice Title", "type": "text" },
+                { "key": "category", "value": "ACADEMIC", "type": "text" },
+                { "key": "content", "value": "Notice description...", "type": "text" },
+                { "key": "attachments", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/content/notices", "host": ["{{baseUrl}}"], "path": ["content", "notices"] }
+          }
+        },
+        {
+          "name": "Delete Notice",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": { "raw": "{{baseUrl}}/content/notices/:id", "host": ["{{baseUrl}}"], "path": ["content", "notices", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Get Achievements",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/content/achievements", "host": ["{{baseUrl}}"], "path": ["content", "achievements"] }
+          }
+        },
+        {
+          "name": "Create Achievement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Ach Title", "type": "text" },
+                { "key": "category", "value": "RESEARCH", "type": "text" },
+                { "key": "description", "value": "Ach description...", "type": "text" },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/content/achievements", "host": ["{{baseUrl}}"], "path": ["content", "achievements"] }
+          }
+        },
+        {
+          "name": "Delete Achievement",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": { "raw": "{{baseUrl}}/content/achievements/:id", "host": ["{{baseUrl}}"], "path": ["content", "achievements", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          }
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events/:id", "host": ["{{baseUrl}}"], "path": ["events", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Event", "type": "text" },
+                { "key": "category", "value": "WORKSHOP", "type": "text" },
+                { "key": "startDate", "value": "2026-06-01", "type": "text" },
+                { "key": "endDate", "value": "2026-06-02", "type": "text" },
+                { "key": "venue", "value": "Seminar Room", "type": "text" },
+                { "key": "description", "value": "Desc", "type": "text" },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Society",
+      "item": [
+        {
+          "name": "Get Societies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/society", "host": ["{{baseUrl}}"], "path": ["society"] }
+          }
+        },
+        {
+          "name": "Create Society",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Society Name", "type": "text" },
+                { "key": "category", "value": "CULTURAL", "type": "text" },
+                { "key": "description", "value": "Society Desc", "type": "text" },
+                { "key": "logo", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/society", "host": ["{{baseUrl}}"], "path": ["society"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Academic",
+      "item": [
+        {
+          "name": "Get Courses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/academic/courses", "host": ["{{baseUrl}}"], "path": ["academic", "courses"] }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseCode\": \"CSEXXX\",\n  \"title\": \"Course Title\",\n  \"credits\": 3,\n  \"type\": \"THEORY\",\n  \"level\": \"UNDERGRADUATE\",\n  \"semester\": 1,\n  \"description\": \"Desc\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/academic/courses", "host": ["{{baseUrl}}"], "path": ["academic", "courses"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "My Payments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": { "raw": "{{baseUrl}}/payment/my", "host": ["{{baseUrl}}"], "path": ["payment", "my"] }
+          }
+        },
+        {
+          "name": "All Payments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": { "raw": "{{baseUrl}}/payment/all", "host": ["{{baseUrl}}"], "path": ["payment", "all"] }
+          }
+        },
+        {
+          "name": "Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000,\n  \"category\": \"EVENT_REGISTRATION\",\n  \"method\": \"BKASH\",\n  \"description\": \"Payment for carnival\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/payment/initiate", "host": ["{{baseUrl}}"], "path": ["payment", "initiate"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ]
 }
