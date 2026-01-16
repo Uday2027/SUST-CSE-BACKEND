@@ -1,0 +1,16 @@
+export enum SportType {
+  CRICKET = 'CRICKET',
+  FOOTBALL = 'FOOTBALL',
+  VOLLEYBALL = 'VOLLEYBALL',
+  BADMINTON = 'BADMINTON',
+  TABLE_TENNIS = 'TABLE_TENNIS',
+  CHESS = 'CHESS',
+  OTHER = 'OTHER',
+}
+
+export enum TournamentStatus {
+  UPCOMING = 'UPCOMING',
+  ONGOING = 'ONGOING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
