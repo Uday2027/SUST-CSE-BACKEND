@@ -3,6 +3,12 @@ import { IUser } from '@/modules/user/user.interface';
 import { AppError, AuthenticationError, ConflictError } from '@/utils/errors';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwt.util';
 import { UserRole, UserStatus } from '@/modules/user/user.types';
+import { sendVerificationEmail } from '@/utils/email.util';
+import crypto from 'crypto';
+
+const generateVerificationCode = (): string => {
+  return crypto.randomInt(100000, 999999).toString();
+};
 
 export const registerStudent = async (data: any) => {
   const isExist = await User.findOne({ email: data.email });
@@ -10,25 +16,24 @@ export const registerStudent = async (data: any) => {
     throw new ConflictError('User with this email already exists');
   }
 
+  const verificationCode = generateVerificationCode();
+  const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
   const student = (await Student.create({
     ...data,
     role: UserRole.STUDENT,
+    verificationCode,
+    verificationCodeExpires,
+    isEmailVerified: false,
   })) as any;
 
-  const tokens = {
-    accessToken: generateAccessToken({
-      userId: student._id.toString(),
-      role: student.role,
-      email: student.email,
-    }),
-    refreshToken: generateRefreshToken({
-      userId: student._id.toString(),
-      role: student.role,
-      email: student.email,
-    }),
-  };
+  // Send verification email
+  await sendVerificationEmail(student.email, verificationCode);
 
-  return { student, tokens };
+  return { 
+    user: student,
+    message: 'Registration successful. Please check your email for the verification code.'
+  };
 };
 
 export const registerTeacher = async (data: any) => {
@@ -37,26 +42,25 @@ export const registerTeacher = async (data: any) => {
     throw new ConflictError('User with this email already exists');
   }
 
+  const verificationCode = generateVerificationCode();
+  const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
   const teacher = (await Teacher.create({
     ...data,
     role: UserRole.TEACHER,
     status: UserStatus.PENDING,
+    verificationCode,
+    verificationCodeExpires,
+    isEmailVerified: false,
   })) as any;
 
-  const tokens = {
-    accessToken: generateAccessToken({
-      userId: teacher._id.toString(),
-      role: teacher.role,
-      email: teacher.email,
-    }),
-    refreshToken: generateRefreshToken({
-      userId: teacher._id.toString(),
-      role: teacher.role,
-      email: teacher.email,
-    }),
-  };
+  // Send verification email
+  await sendVerificationEmail(teacher.email, verificationCode);
 
-  return { teacher, tokens };
+  return { 
+    user: teacher,
+    message: 'Registration successful. Please check your email for the verification code. After verification, your account will be sent to admin for approval.'
+  };
 };
 
 export const loginUser = async (data: any) => {
@@ -66,8 +70,12 @@ export const loginUser = async (data: any) => {
     throw new AuthenticationError('Invalid email or password');
   }
 
+  if (!user.isEmailVerified) {
+    throw new AppError('Please verify your email address before logging in. Check your email for the verification code.', 403);
+  }
+
   if (user.status !== 'ACTIVE') {
-    throw new AuthenticationError('Your account is not active');
+    throw new AuthenticationError('Your account is not active. Please contact admin.');
   }
 
   const tokens = {
@@ -84,4 +92,71 @@ export const loginUser = async (data: any) => {
   };
 
   return { user, tokens };
+};
+
+export const verifyEmail = async (email: string, code: string) => {
+  const user = (await User.findOne({ email }).select('+verificationCode +verificationCodeExpires')) as any;
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  if (user.isEmailVerified) {
+    throw new AppError('Email is already verified', 400);
+  }
+
+  if (!user.verificationCode || !user.verificationCodeExpires) {
+    throw new AppError('No verification code found. Please request a new one.', 400);
+  }
+
+  if (user.verificationCodeExpires < new Date()) {
+    throw new AppError('Verification code has expired. Please request a new one.', 400);
+  }
+
+  if (user.verificationCode !== code) {
+    throw new AppError('Invalid verification code', 400);
+  }
+
+  user.isEmailVerified = true;
+  user.verificationCode = undefined;
+  user.verificationCodeExpires = undefined;
+  await user.save();
+
+  const tokens = {
+    accessToken: generateAccessToken({
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email,
+    }),
+    refreshToken: generateRefreshToken({
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email,
+    }),
+  };
+
+  return { user, tokens };
+};
+
+export const resendVerificationCode = async (email: string) => {
+  const user = (await User.findOne({ email })) as any;
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  if (user.isEmailVerified) {
+    throw new AppError('Email is already verified', 400);
+  }
+
+  const verificationCode = generateVerificationCode();
+  const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  user.verificationCode = verificationCode;
+  user.verificationCodeExpires = verificationCodeExpires;
+  await user.save();
+
+  await sendVerificationEmail(user.email, verificationCode);
+
+  return { message: 'Verification code has been resent to your email' };
 };

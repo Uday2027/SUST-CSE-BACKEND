@@ -4,6 +4,9 @@ import { AchievementCategory, NoticeCategory } from './content.types';
 export const homePageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   subtitle: z.string().min(1, 'Subtitle is required'),
+  description: z.string().min(1, 'Description is required'),
+  ctaText: z.string().min(1, 'CTA Text is required'),
+  ctaLink: z.string().min(1, 'CTA Link is required'),
 });
 
 export const noticeSchema = z.object({

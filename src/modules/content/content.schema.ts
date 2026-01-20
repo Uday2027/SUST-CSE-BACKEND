@@ -3,20 +3,23 @@ import { IAchievement, IHomePage, INotice } from './content.interface';
 import { AchievementCategory, NoticeCategory } from './content.types';
 
 // HomePage Schema (Singleton-ish)
-const homePageSchema = new Schema<IHomePage>(
+const homePageSchema = new Schema(
   {
-    heroImage: { type: String, required: true },
+    heroImage: { type: String, required: false, default: undefined },
     title: { type: String, required: true },
     subtitle: { type: String, required: true },
+    description: { type: String, required: true },
+    ctaText: { type: String, required: true },
+    ctaLink: { type: String, required: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
 
-export const HomePage = model<IHomePage>('HomePage', homePageSchema);
+export const HomePage = model('SiteContent', homePageSchema);
 
 // Notice Schema
-const noticeSchema = new Schema<INotice>(
+const noticeSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
@@ -38,7 +41,7 @@ const noticeSchema = new Schema<INotice>(
 export const Notice = model<INotice>('Notice', noticeSchema);
 
 // Achievement Schema
-const achievementSchema = new Schema<IAchievement>(
+const achievementSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },

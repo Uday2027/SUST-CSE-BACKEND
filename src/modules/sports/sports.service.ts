@@ -7,8 +7,8 @@ export const createTournament = async (data: any, files: Express.Multer.File[], 
   const images = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const { url } = await uploadToCloudinary(file, 'sust-cse/sports/tournaments');
-      images.push(url);
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/sports/tournaments');
+      images.push(secure_url);
     }
   }
 
@@ -44,8 +44,8 @@ export const updateTournament = async (id: string, data: any, files: Express.Mul
   if (files && files.length > 0) {
     const images = [];
     for (const file of files) {
-      const { url } = await uploadToCloudinary(file, 'sust-cse/sports/tournaments');
-      images.push(url);
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/sports/tournaments');
+      images.push(secure_url);
     }
     updateData.images = [...(tournament.images || []), ...images];
   }
@@ -61,11 +61,11 @@ export const deleteTournament = async (id: string) => {
 
 // Player Showcase
 export const createPlayerShowcase = async (data: any, file: Express.Multer.File, userId: string) => {
-  const { url } = await uploadToCloudinary(file, 'sust-cse/sports/players');
+  const { secure_url } = await uploadToCloudinary(file, 'sust-cse/sports/players');
   
   return await PlayerShowcase.create({
     ...data,
-    image: url,
+    image: secure_url,
     createdBy: userId,
   });
 };
@@ -84,8 +84,8 @@ export const getAllPlayerShowcases = async (query: any) => {
 export const updatePlayerShowcase = async (id: string, data: any, file?: Express.Multer.File) => {
   const updateData = { ...data };
   if (file) {
-    const { url } = await uploadToCloudinary(file, 'sust-cse/sports/players');
-    updateData.image = url;
+    const { secure_url } = await uploadToCloudinary(file, 'sust-cse/sports/players');
+    updateData.image = secure_url;
   }
 
   const showcase = await PlayerShowcase.findByIdAndUpdate(id, updateData, { new: true });

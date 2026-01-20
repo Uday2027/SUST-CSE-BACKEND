@@ -10,6 +10,9 @@ export interface IUser {
   profileImage?: string;
   phone: string;
   status: UserStatus;
+  isEmailVerified: boolean;
+  verificationCode?: string;
+  verificationCodeExpires?: Date;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;

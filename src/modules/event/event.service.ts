@@ -10,14 +10,14 @@ export const createEvent = async (data: any, files: { [fieldname: string]: Expre
   if (files) {
     if (files['images']) {
       for (const file of files['images']) {
-        const { url } = await uploadToCloudinary(file, 'sust-cse/events/images');
-        images.push(url);
+        const { secure_url } = await uploadToCloudinary(file, 'sust-cse/events/images');
+        images.push(secure_url);
       }
     }
     if (files['attachments']) {
       for (const file of files['attachments']) {
-        const { url } = await uploadToCloudinary(file, 'sust-cse/events/attachments');
-        attachments.push(url);
+        const { secure_url } = await uploadToCloudinary(file, 'sust-cse/events/attachments');
+        attachments.push(secure_url);
       }
     }
   }
@@ -67,16 +67,16 @@ export const updateEvent = async (id: string, data: any, files: { [fieldname: st
     if (files['images']) {
       const images = [];
       for (const file of files['images']) {
-        const { url } = await uploadToCloudinary(file, 'sust-cse/events/images');
-        images.push(url);
+        const { secure_url } = await uploadToCloudinary(file, 'sust-cse/events/images');
+        images.push(secure_url);
       }
       updateData.images = [...(event.images || []), ...images];
     }
     if (files['attachments']) {
       const attachments = [];
       for (const file of files['attachments']) {
-        const { url } = await uploadToCloudinary(file, 'sust-cse/events/attachments');
-        attachments.push(url);
+        const { secure_url } = await uploadToCloudinary(file, 'sust-cse/events/attachments');
+        attachments.push(secure_url);
       }
       updateData.attachments = [...(event.attachments || []), ...attachments];
     }

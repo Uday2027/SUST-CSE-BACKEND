@@ -4,11 +4,11 @@ import { NotFoundError } from '@/utils/errors';
 
 // Societies
 export const createSociety = async (data: any, file: Express.Multer.File, userId: string) => {
-  const { url } = await uploadToCloudinary(file, 'sust-cse/societies');
+  const { secure_url } = await uploadToCloudinary(file, 'sust-cse/societies');
   
   return await Society.create({
     ...data,
-    logo: url,
+    logo: secure_url,
     createdBy: userId,
   });
 };
@@ -29,8 +29,8 @@ export const getSocietyById = async (id: string) => {
 export const updateSociety = async (id: string, data: any, file: Express.Multer.File | undefined) => {
   let updates = { ...data };
   if (file) {
-    const { url } = await uploadToCloudinary(file, 'sust-cse/societies');
-    updates.logo = url;
+    const { secure_url } = await uploadToCloudinary(file, 'sust-cse/societies');
+    updates.logo = secure_url;
   }
   
   const society = await Society.findByIdAndUpdate(id, updates, { new: true });
@@ -45,8 +45,8 @@ export const addMember = async (societyId: string, data: any, file: Express.Mult
 
   let imageUrl;
   if (file) {
-    const { url } = await uploadToCloudinary(file, 'sust-cse/societies/members');
-    imageUrl = url;
+    const { secure_url } = await uploadToCloudinary(file, 'sust-cse/societies/members');
+    imageUrl = secure_url;
   }
 
   return await SocietyMember.create({

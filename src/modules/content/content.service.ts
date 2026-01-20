@@ -14,12 +14,12 @@ export const updateHomePage = async (data: any, file: Express.Multer.File | unde
   const updateData = { ...data, updatedBy: userId };
 
   if (file) {
-    const { url } = await uploadToCloudinary(file, 'sust-cse/homepage');
-    updateData.heroImage = url;
+    const { secure_url } = await uploadToCloudinary(file, 'sust-cse/homepage');
+    updateData.heroImage = secure_url;
   }
 
   if (homepage) {
-    return await HomePage.findByIdAndUpdate(homepage._id, updateData, { new: true });
+    return await HomePage.findByIdAndUpdate(homepage._id, updateData, { new: true, runValidators: true });
   } else {
     return await HomePage.create(updateData);
   }
@@ -30,8 +30,8 @@ export const createNotice = async (data: any, files: Express.Multer.File[], user
   const attachments = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const { url } = await uploadToCloudinary(file, 'sust-cse/notices');
-      attachments.push(url);
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/notices');
+      attachments.push(secure_url);
     }
   }
 
@@ -68,8 +68,8 @@ export const createAchievement = async (data: any, files: Express.Multer.File[],
   const images = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const { url } = await uploadToCloudinary(file, 'sust-cse/achievements');
-      images.push(url);
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/achievements');
+      images.push(secure_url);
     }
   }
 

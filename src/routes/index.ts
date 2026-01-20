@@ -8,6 +8,7 @@ import { AcademicRoutes } from '@/modules/academic/academic.routes';
 import { PaymentRoutes } from '@/modules/payment/payment.routes';
 import { UserRoutes } from '@/modules/user/user.routes';
 import { BlogRoutes } from '@/modules/blog/blog.routes';
+import { AlumniRoutes } from '@/modules/alumni/alumni.routes';
 
 const router = express.Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: '/users',
     route: UserRoutes,
+  },
+  {
+    path: '/alumni',
+    route: AlumniRoutes,
   },
 ];
 

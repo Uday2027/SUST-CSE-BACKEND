@@ -30,3 +30,17 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, null, 'User logged out successfully');
 });
+
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { email, code } = req.body;
+  const result = await AuthService.verifyEmail(email, code);
+  
+  successResponse(res, result, 'Email verified successfully');
+});
+
+export const resendCode = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await AuthService.resendVerificationCode(email);
+  
+  successResponse(res, result, 'Verification code sent successfully');
+});

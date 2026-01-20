@@ -4,14 +4,14 @@ import { AppError } from './errors/AppError';
 export const uploadToCloudinary = async (
   file: Express.Multer.File,
   folder: string
-): Promise<{ url: string; public_id: string }> => {
+): Promise<{ secure_url: string; public_id: string }> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder, resource_type: 'auto' },
       (error, result) => {
         if (error) return reject(new AppError('Cloudinary upload failed', 500));
         resolve({
-          url: result!.secure_url,
+          secure_url: result!.secure_url,
           public_id: result!.public_id,
         });
       }

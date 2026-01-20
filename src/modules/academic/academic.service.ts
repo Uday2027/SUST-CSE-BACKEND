@@ -33,8 +33,8 @@ export const createAchievement = async (data: any, files: Express.Multer.File[],
   const attachments = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const { url } = await uploadToCloudinary(file, 'sust-cse/academic/achievements');
-      attachments.push(url);
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/academic/achievements');
+      attachments.push(secure_url);
     }
   }
 

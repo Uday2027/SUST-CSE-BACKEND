@@ -1,7 +1,7 @@
 import express from 'express';
 import * as AuthController from './auth.controller';
 import { validate } from '@/middleware/validate.middleware';
-import { registerStudentSchema, registerTeacherSchema, loginSchema } from './auth.validator';
+import { registerStudentSchema, registerTeacherSchema, loginSchema, verifyEmailSchema, resendCodeSchema } from './auth.validator';
 import { auth } from '@/middleware/auth.middleware';
 
 const router = express.Router();
@@ -22,6 +22,18 @@ router.post(
   '/login',
   validate(loginSchema),
   AuthController.login
+);
+
+router.post(
+  '/verify-email',
+  validate(verifyEmailSchema),
+  AuthController.verifyEmail
+);
+
+router.post(
+  '/resend-code',
+  validate(resendCodeSchema),
+  AuthController.resendCode
 );
 
 router.get(

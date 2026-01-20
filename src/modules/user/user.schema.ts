@@ -39,6 +39,18 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
       enum: Object.values(UserStatus),
       default: UserStatus.ACTIVE,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
+      select: false,
+    },
+    verificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

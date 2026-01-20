@@ -20,7 +20,7 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const users = await User.find(filter)
-    .select('name email role status phone profileImage studentId designation createdAt')
+    .select('name email role status phone profileImage studentId designation isEmailVerified createdAt')
     .sort({ createdAt: -1 })
     .limit(Number(limit))
     .skip((Number(page) - 1) * Number(limit));
@@ -46,34 +46,46 @@ export const updateUserStatus = asyncHandler(async (req: Request, res: Response)
 });
 
 export const updateMyProfile = asyncHandler(async (req: Request, res: Response) => {
-  const userId = (req as any).user._id;
-  const updates: any = { ...req.body };
-  
-  // Remove sensitive or unauthorized fields
-  delete updates.email;
-  delete updates.password;
-  delete updates.role;
-  delete updates.status;
-  delete updates.isDeleted;
+  const user = (req as any).user;
+  const updates = req.body;
 
-  const user = await User.findById(userId);
+  // Handle profile image upload
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(req.file, 'profiles');
+    updates.profileImage = uploadResult.secure_url;
+  }
+
+  // Prevent updating sensitive fields
+  const sanitizedUpdates: any = {};
+  const allowedFields = ['name', 'phone', 'profileImage', 'designation', 'researchInterests', 'publications', 'cgpa'];
+  
+  Object.keys(updates).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      sanitizedUpdates[key] = updates[key];
+    }
+  });
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user.userId,
+    sanitizedUpdates,
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new AppError('User not found', 404);
+  }
+
+  successResponse(res, updatedUser, 'Profile updated successfully');
+});
+
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.params.id as string;
+
+  const user = await User.findByIdAndDelete(userId);
+
   if (!user) {
     throw new AppError('User not found', 404);
   }
 
-  // Handle profile image update
-  if (req.file) {
-    // Note: If the project doesn't store public_id, we might not be able to delete reliably 
-    // without parsing the URL. For now, let's just upload the new one.
-    const result = await uploadToCloudinary(req.file, 'profiles');
-    updates.profileImage = result.url;
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    updates,
-    { new: true, runValidators: true }
-  );
-
-  successResponse(res, updatedUser, 'Profile updated successfully');
+  successResponse(res, null, 'User deleted successfully');
 });

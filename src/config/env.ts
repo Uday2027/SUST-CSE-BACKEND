@@ -27,6 +27,12 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string({
     required_error: 'CLOUDINARY_API_SECRET is required',
   }),
+  EMAIL_USER: z.string({
+    required_error: 'EMAIL_USER is required',
+  }),
+  EMAIL_PASS: z.string({
+    required_error: 'EMAIL_PASS is required',
+  }),
   CLIENT_URL: z.string().default('http://localhost:3000'),
 });
 
