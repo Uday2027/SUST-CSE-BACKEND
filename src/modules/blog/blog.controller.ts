@@ -21,18 +21,23 @@ export const getPendingBlogs = asyncHandler(async (req: Request, res: Response) 
   successResponse(res, blogs, 'Pending blogs fetched successfully');
 });
 
+export const getMyBlogs = asyncHandler(async (req: Request, res: Response) => {
+  const blogs = await BlogService.getMyBlogs((req as any).user._id);
+  successResponse(res, blogs, 'Your blogs fetched successfully');
+});
+
 export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
-  const blog = await BlogService.getBlogById(req.params.id);
+  const blog = await BlogService.getBlogById(req.params.id as string);
   successResponse(res, blog, 'Blog post fetched successfully');
 });
 
 export const verifyBlog = asyncHandler(async (req: Request, res: Response) => {
-  const blog = await BlogService.verifyBlog(req.params.id, req.body.status);
+  const blog = await BlogService.verifyBlog(req.params.id as string, req.body.status);
   successResponse(res, blog, `Blog post ${req.body.status.toLowerCase()} successfully`);
 });
 
 export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
-  await BlogService.deleteBlog(req.params.id, user._id, user.role);
+  await BlogService.deleteBlog(req.params.id as string, user._id, user.role);
   successResponse(res, null, 'Blog post deleted successfully');
 });

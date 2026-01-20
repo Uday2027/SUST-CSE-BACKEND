@@ -14,6 +14,10 @@ export const getPendingBlogs = async (): Promise<IBlog[]> => {
   return Blog.find({ status: BlogStatus.PENDING }).populate('author', 'name profileImage');
 };
 
+export const getMyBlogs = async (userId: string): Promise<IBlog[]> => {
+  return Blog.find({ author: userId }).sort({ createdAt: -1 });
+};
+
 export const getBlogById = async (id: string): Promise<IBlog | null> => {
   const blog = await Blog.findById(id).populate('author', 'name profileImage');
   if (!blog) {

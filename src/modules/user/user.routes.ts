@@ -1,14 +1,28 @@
 import express from 'express';
 import * as UserController from './user.controller';
 import { auth } from '@/middleware/auth.middleware';
+import { upload } from '@/middleware/upload.middleware';
 import { UserRole } from './user.types';
 
 const router = express.Router();
 
 router.get(
   '/',
-  auth(UserRole.ADMIN), // Only admins can list users
+  auth(UserRole.ADMIN),
   UserController.getAllUsers
+);
+
+router.patch(
+  '/:id/status',
+  auth(UserRole.ADMIN),
+  UserController.updateUserStatus
+);
+
+router.patch(
+  '/me',
+  auth(),
+  upload.single('profileImage'),
+  UserController.updateMyProfile
 );
 
 export const UserRoutes = router;

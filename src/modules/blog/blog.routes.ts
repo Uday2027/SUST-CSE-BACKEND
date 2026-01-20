@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.get('/', BlogController.getPublishedBlogs);
 router.get('/pending', auth(UserRole.ADMIN), BlogController.getPendingBlogs);
+router.get('/mine', auth(), BlogController.getMyBlogs);
 router.get('/:id', BlogController.getBlogById);
 
 router.post(
