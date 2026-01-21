@@ -7,6 +7,7 @@ export const homePageSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   ctaText: z.string().min(1, 'CTA Text is required'),
   ctaLink: z.string().min(1, 'CTA Link is required'),
+  heroImages: z.array(z.string()).optional(),
 });
 
 export const noticeSchema = z.object({

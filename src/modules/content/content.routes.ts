@@ -13,7 +13,7 @@ router.get('/homepage', ContentController.getHomePage);
 router.put(
   '/homepage',
   auth(UserRole.ADMIN),
-  upload.single('heroImage'),
+  upload.array('heroImages', 5),
   validate(homePageSchema),
   ContentController.updateHomePage
 );

@@ -11,7 +11,7 @@ export const getHomePage = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateHomePage = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
-  const result = await ContentService.updateHomePage(req.body, req.file, userId);
+  const result = await ContentService.updateHomePage(req.body, req.files as Express.Multer.File[], userId);
   successResponse(res, result, 'Homepage updated successfully');
 });
 

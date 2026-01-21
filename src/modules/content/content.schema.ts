@@ -5,7 +5,7 @@ import { AchievementCategory, NoticeCategory } from './content.types';
 // HomePage Schema (Singleton-ish)
 const homePageSchema = new Schema(
   {
-    heroImage: { type: String, required: false, default: undefined },
+    heroImages: [{ type: String, required: false }],
     title: { type: String, required: true },
     subtitle: { type: String, required: true },
     description: { type: String, required: true },

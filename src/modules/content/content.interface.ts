@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { AchievementCategory, NoticeCategory } from './content.types';
 
 export interface IHomePage {
-  heroImage?: string;
+  heroImages: string[];
   title: string;
   subtitle: string;
   description: string;

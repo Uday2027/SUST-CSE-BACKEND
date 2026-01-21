@@ -8,15 +8,19 @@ export const getHomePage = async () => {
   return await HomePage.findOne().populate('updatedBy', 'name email');
 };
 
-export const updateHomePage = async (data: any, file: Express.Multer.File | undefined, userId: string) => {
+export const updateHomePage = async (data: any, files: Express.Multer.File[] | undefined, userId: string) => {
   let homepage = await HomePage.findOne();
 
   const updateData = { ...data, updatedBy: userId };
 
-  if (file) {
-    const { secure_url } = await uploadToCloudinary(file, 'sust-cse/homepage');
-    updateData.heroImage = secure_url;
+  const heroImages = homepage?.heroImages || [];
+  if (files && files.length > 0) {
+    for (const file of files) {
+      const { secure_url } = await uploadToCloudinary(file, 'sust-cse/homepage');
+      heroImages.push(secure_url);
+    }
   }
+  updateData.heroImages = heroImages;
 
   if (homepage) {
     return await HomePage.findByIdAndUpdate(homepage._id, updateData, { new: true, runValidators: true });
