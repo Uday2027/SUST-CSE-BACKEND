@@ -11,112 +11,107 @@ export const getHomePage = async () => {
 };
 
 export const updateHomePage = async (data: any, files: Express.Multer.File[] | undefined, userId: string) => {
-  console.log('--- Homepage Update Start ---');
-  console.log('Received data:', JSON.stringify(data, null, 2));
-  console.log('Received files:', files?.map(f => ({ name: f.originalname, size: f.size })));
-
+  console.log('=== updateHomePage called ===');
+  console.log('Files received:', files ? files.length : 0);
+  console.log('Files array:', files);
+  console.log('Data received:', data);
+  
   let homepage = await HomePage.findOne();
   if (!homepage) {
-    console.log('No homepage found, creating new one...');
-    homepage = await HomePage.create({ heroSlides: [], updatedBy: userId });
+    homepage = new HomePage({ heroSlides: [], updatedBy: userId });
   }
 
-  let finalSlides = Array.isArray(homepage.heroSlides) ? [...homepage.heroSlides] : [];
+  // Ensure heroSlides is an array
+  let currentSlides = Array.isArray(homepage.heroSlides) ? [...homepage.heroSlides] : [];
   
-  // Clean up if we somehow have non-objects in the array (migration safety)
-  finalSlides = finalSlides.filter(s => s && typeof s === 'object');
-  
-  const parseIndex = (val: any) => {
+  const parseIdx = (val: any) => {
     if (val === undefined || val === 'undefined' || val === 'null' || val === null || val === '') return undefined;
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? undefined : parsed;
+    const p = parseInt(String(val));
+    return isNaN(p) ? undefined : p;
   };
 
-  const deleteIndex = parseIndex(data.deleteSlideIndex);
-  const editIndex = parseIndex(data.editSlideIndex);
+  const deleteIndex = parseIdx(data.deleteSlideIndex);
+  const editIndex = parseIdx(data.editSlideIndex);
 
-  console.log('Parsed Indices:', { deleteIndex, editIndex });
-
-  // 1. Handle Deletion if requested
-  if (deleteIndex !== undefined) {
-    console.log(`Deleting slide at index ${deleteIndex}`);
-    if (deleteIndex >= 0 && deleteIndex < finalSlides.length) {
-      finalSlides.splice(deleteIndex, 1);
-    }
+  // 1. Handle Deletion
+  if (deleteIndex !== undefined && deleteIndex >= 0 && deleteIndex < currentSlides.length) {
+    currentSlides.splice(deleteIndex, 1);
   }
 
-  // Helper for cleaner property handling
-  const cleanStr = (val: any) => (val === undefined || val === 'undefined' || val === 'null' || val === null) ? '' : String(val);
+  // 2. Handle New/Update
+  const clean = (v: any) => (v === undefined || v === 'undefined' || v === 'null' || v === null) ? '' : String(v);
 
-  // 2. Handle New Slide or Update
   if (files && files.length > 0) {
-    console.log('Processing new image upload to Cloudinary...');
-    const { secure_url } = await uploadToCloudinary(files[0], 'sust-cse/homepage');
-    console.log('Cloudinary response:', secure_url);
+    console.log('Uploading file to Cloudinary...');
+    console.log('File details:', {
+      filename: files[0].originalname,
+      mimetype: files[0].mimetype,
+      size: files[0].size,
+      hasBuffer: !!files[0].buffer
+    });
     
-    const slideData = {
-      title: cleanStr(data.title) || 'New Slide',
-      subtitle: cleanStr(data.subtitle),
-      description: cleanStr(data.description),
-      ctaText: cleanStr(data.ctaText),
-      ctaLink: cleanStr(data.ctaLink),
-      image: secure_url
-    };
+    try {
+      const { secure_url } = await uploadToCloudinary(files[0], 'sust-cse/homepage');
+      console.log('Cloudinary upload successful! URL:', secure_url);
+      
+      const slideData = {
+        title: clean(data.title) || 'New Slide',
+        subtitle: clean(data.subtitle),
+        description: clean(data.description),
+        ctaText: clean(data.ctaText),
+        ctaLink: clean(data.ctaLink),
+        image: secure_url
+      };
 
-    if (editIndex !== undefined) {
-      console.log(`Updating existing slide at index ${editIndex} with new image`);
-      if (editIndex >= 0 && editIndex < finalSlides.length) {
-        finalSlides[editIndex] = slideData;
+      if (editIndex !== undefined && editIndex >= 0 && editIndex < currentSlides.length) {
+        currentSlides[editIndex] = slideData;
+      } else if (deleteIndex === undefined) { 
+        currentSlides.push(slideData);
       }
-    } else {
-      console.log('Adding new slide to banner');
-      finalSlides.push(slideData);
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      throw error;
     }
-  } else if (data.title) {
-    // Basic content update without new image
-    if (editIndex !== undefined) {
-      console.log(`Updating content only for slide at index ${editIndex}`);
-      if (editIndex >= 0 && editIndex < finalSlides.length) {
-        finalSlides[editIndex] = {
-          ...finalSlides[editIndex],
-          title: cleanStr(data.title),
-          subtitle: cleanStr(data.subtitle) || finalSlides[editIndex].subtitle,
-          description: cleanStr(data.description) || finalSlides[editIndex].description,
-          ctaText: cleanStr(data.ctaText),
-          ctaLink: cleanStr(data.ctaLink),
-          image: finalSlides[editIndex].image
-        };
-      }
-    } else {
-       console.error('New slide requested but no image provided');
-       throw new Error("Image is required for a new hero slide");
+  } else if (data.title && editIndex !== undefined) {
+    console.log('No files received, updating text only');
+    if (editIndex >= 0 && editIndex < currentSlides.length) {
+      currentSlides[editIndex] = {
+        title: clean(data.title),
+        subtitle: clean(data.subtitle),
+        description: clean(data.description),
+        ctaText: clean(data.ctaText),
+        ctaLink: clean(data.ctaLink),
+        image: currentSlides[editIndex].image
+      };
     }
+  } else {
+    console.log('No files and no valid update operation');
   }
 
-  console.log(`Total slides after operation: ${finalSlides.length}`);
+  // Final update with explicit cleanup
+  homepage.heroSlides = currentSlides;
+  homepage.updatedBy = userId;
   
-  try {
-    const updated = await HomePage.findByIdAndUpdate(
-      homepage._id, 
-      { 
-        $set: { heroSlides: finalSlides, updatedBy: userId },
-        $unset: { 
-          heroImage: "", 
-          heroImages: "", 
-          // title, subtitle etc are technically fine to keep but let's focus on the array
-        }
-      }, 
-      { new: true, runValidators: true }
-    );
-    console.log('Database updated successfully');
-    return updated;
-  } catch (error: any) {
-    console.error('❌ Database update failed:', error.message);
-    if (error.errors) {
-      console.error('Validation Errors:', JSON.stringify(error.errors, null, 2));
-    }
-    throw error;
-  }
+  // Explicitly clear legacy fields
+  homepage.heroImage = undefined;
+  homepage.heroImages = undefined;
+  homepage.title = undefined;
+  homepage.subtitle = undefined;
+  homepage.description = undefined;
+  homepage.ctaText = undefined;
+  homepage.ctaLink = undefined;
+
+  // Since we have strict: false, Mongoose will try to save these as undefined
+  // But we can also use .set() for explicit undefined
+  homepage.set('heroImage', undefined);
+  homepage.set('heroImages', undefined);
+  homepage.set('title', undefined);
+  homepage.set('subtitle', undefined);
+  homepage.set('description', undefined);
+  homepage.set('ctaText', undefined);
+  homepage.set('ctaLink', undefined);
+
+  return await homepage.save();
 };
 
 // Notices
@@ -196,6 +191,12 @@ export const getAllAchievements = async (filters: any) => {
 
 export const deleteAchievement = async (id: string) => {
   const achievement = await Achievement.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+  if (!achievement) throw new NotFoundError('Achievement not found');
+  return achievement;
+};
+
+export const getAchievementById = async (id: string) => {
+  const achievement = await Achievement.findById(id).populate('achievedBy', 'name email profileImage').populate('createdBy', 'name email');
   if (!achievement) throw new NotFoundError('Achievement not found');
   return achievement;
 };

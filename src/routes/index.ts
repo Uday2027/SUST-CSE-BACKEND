@@ -9,8 +9,10 @@ import { PaymentRoutes } from '@/modules/payment/payment.routes';
 import { UserRoutes } from '@/modules/user/user.routes';
 import { BlogRoutes } from '@/modules/blog/blog.routes';
 import { AlumniRoutes } from '@/modules/alumni/alumni.routes';
+import { ProductRoutes } from '@/modules/product/product.routes';
 
 const router = express.Router();
+console.log('✅ Main Router Module Loaded');
 
 const moduleRoutes = [
   {
@@ -52,6 +54,10 @@ const moduleRoutes = [
   {
     path: '/alumni',
     route: AlumniRoutes,
+  },
+  {
+    path: '/',
+    route: ProductRoutes,
   },
 ];
 

@@ -44,3 +44,20 @@ export const resendCode = asyncHandler(async (req: Request, res: Response) => {
   
   successResponse(res, result, 'Verification code sent successfully');
 });
+
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await AuthService.forgotPassword(email);
+  successResponse(res, result, 'Reset code sent successfully');
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const result = await AuthService.resetPassword(req.body);
+  successResponse(res, result, 'Password reset successfully');
+});
+
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const result = await AuthService.changePassword(userId, req.body);
+  successResponse(res, result, 'Password updated successfully');
+});

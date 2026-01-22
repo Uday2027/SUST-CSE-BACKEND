@@ -12,12 +12,20 @@ const heroSlideSchema = new Schema({
   ctaLink: { type: String },
 });
 
-const homePageSchema = new Schema<IHomePage>(
+const homePageSchema = new Schema<any>(
   {
     heroSlides: [heroSlideSchema],
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // Legacy fields for cleanup
+    heroImage: { type: String },
+    heroImages: [{ type: String }],
+    title: { type: String },
+    subtitle: { type: String },
+    description: { type: String },
+    ctaText: { type: String },
+    ctaLink: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 export const HomePage = model<IHomePage>('SiteContent', homePageSchema);

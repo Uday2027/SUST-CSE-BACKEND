@@ -171,3 +171,65 @@ export const resendVerificationCode = async (email: string) => {
 
   return { message: 'Verification code has been resent to your email' };
 };
+
+export const forgotPassword = async (email: string) => {
+  const user = (await User.findOne({ email })) as any;
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  const verificationCode = generateVerificationCode();
+  const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  user.verificationCode = verificationCode;
+  user.verificationCodeExpires = verificationCodeExpires;
+  await user.save();
+
+  await sendVerificationEmail(user.email, verificationCode); // Reusing verification email template for now, or could create a new one
+
+  return { message: 'Password reset code sent to email' };
+};
+
+export const resetPassword = async (data: any) => {
+  const { email, code, newPassword } = data;
+  const user = (await User.findOne({ email }).select('+verificationCode +verificationCodeExpires')) as any;
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  if (user.verificationCode !== code) {
+    throw new AppError('Invalid verification code', 400);
+  }
+
+  if (user.verificationCodeExpires < new Date()) {
+    throw new AppError('Verification code expired', 400);
+  }
+
+  user.password = newPassword;
+  user.verificationCode = undefined;
+  user.verificationCodeExpires = undefined;
+  await user.save();
+
+  return { message: 'Password reset successfully' };
+};
+
+export const changePassword = async (userId: string, data: any) => {
+  const { oldPassword, newPassword } = data;
+  const user = (await User.findById(userId).select('+password')) as any;
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  const isMatch = await user.comparePassword(oldPassword);
+  if (!isMatch) {
+    throw new AuthenticationError('Invalid current password');
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return { message: 'Password updated successfully' };
+};

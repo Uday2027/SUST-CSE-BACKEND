@@ -53,3 +53,8 @@ export const deleteAchievement = asyncHandler(async (req: Request, res: Response
   await ContentService.deleteAchievement(req.params.id as string);
   successResponse(res, null, 'Achievement deleted successfully');
 });
+
+export const getAchievementById = asyncHandler(async (req: Request, res: Response) => {
+  const result = await ContentService.getAchievementById(req.params.id as string);
+  successResponse(res, result, 'Achievement details fetched successfully');
+});

@@ -36,6 +36,7 @@ router.delete(
 
 // Achievements
 router.get('/achievements', ContentController.getAchievements);
+router.get('/achievements/:id', ContentController.getAchievementById);
 router.post(
   '/achievements',
   auth(UserRole.ADMIN, UserRole.TEACHER),
