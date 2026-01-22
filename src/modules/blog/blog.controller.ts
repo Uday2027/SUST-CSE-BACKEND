@@ -5,6 +5,9 @@ import { successResponse } from '@/utils/response.util';
 import { uploadToCloudinary } from '@/utils/cloudinary.util';
 import { AppError } from '@/utils/errors';
 
+export const createBlog = asyncHandler(async (req: Request, res: Response) => {
+  let imageUrl = '';
+
   // Upload image to Cloudinary if provided
   if (req.file) {
     const { secure_url } = await uploadToCloudinary(req.file, 'sust-cse/blogs');

@@ -2,21 +2,25 @@ import { Schema, model } from 'mongoose';
 import { IAchievement, IHomePage, INotice } from './content.interface';
 import { AchievementCategory, NoticeCategory } from './content.types';
 
-// HomePage Schema (Singleton-ish)
-const homePageSchema = new Schema(
+// HomePage Schema
+const heroSlideSchema = new Schema({
+  image: { type: String, required: true },
+  title: { type: String, required: true },
+  subtitle: { type: String },
+  description: { type: String },
+  ctaText: { type: String },
+  ctaLink: { type: String },
+});
+
+const homePageSchema = new Schema<IHomePage>(
   {
-    heroImages: [{ type: String, required: false }],
-    title: { type: String, required: true },
-    subtitle: { type: String, required: true },
-    description: { type: String, required: true },
-    ctaText: { type: String, required: true },
-    ctaLink: { type: String, required: true },
+    heroSlides: [heroSlideSchema],
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
 
-export const HomePage = model('SiteContent', homePageSchema);
+export const HomePage = model<IHomePage>('SiteContent', homePageSchema);
 
 // Notice Schema
 const noticeSchema = new Schema(
@@ -45,13 +49,16 @@ const achievementSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
-    images: [String],
-    achievedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    teamName: { type: String },
+    competitionName: { type: String, required: true },
+    position: { type: String, required: true },
+    image: { type: String, required: true },
+    achievedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     date: { type: Date, required: true },
     category: {
       type: String,
       enum: Object.values(AchievementCategory),
-      default: AchievementCategory.ACADEMIC,
+      default: AchievementCategory.CP,
     },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isDeleted: { type: Boolean, default: false },

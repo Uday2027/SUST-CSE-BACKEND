@@ -1,13 +1,18 @@
 import { Types } from 'mongoose';
 import { AchievementCategory, NoticeCategory } from './content.types';
 
-export interface IHomePage {
-  heroImages: string[];
+export interface IHeroSlide {
+  _id?: string;
+  image: string;
   title: string;
   subtitle: string;
   description: string;
-  ctaText: string;
-  ctaLink: string;
+  ctaText?: string;
+  ctaLink?: string;
+}
+
+export interface IHomePage {
+  heroSlides: IHeroSlide[];
   updatedBy: Types.ObjectId;
 }
 
@@ -28,8 +33,11 @@ export interface IAchievement {
   _id: Types.ObjectId;
   title: string;
   description: string;
-  images: string[];
-  achievedBy: Types.ObjectId; // User reference
+  teamName?: string;
+  competitionName: string;
+  position: string;
+  image: string;
+  achievedBy?: Types.ObjectId; // User reference (optional if guest/team lead)
   date: Date;
   category: AchievementCategory;
   createdBy: Types.ObjectId;

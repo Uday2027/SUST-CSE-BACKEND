@@ -6,8 +6,13 @@ export enum NoticeCategory {
 }
 
 export enum AchievementCategory {
+  CP = 'CP',
+  HACKATHON = 'HACKATHON',
+  CTF = 'CTF',
+  DL = 'DL',
   ACADEMIC = 'ACADEMIC',
-  SPORTS = 'SPORTS',
   RESEARCH = 'RESEARCH',
+  SPORTS = 'SPORTS',
   CULTURAL = 'CULTURAL',
+  OTHER = 'OTHER',
 }
