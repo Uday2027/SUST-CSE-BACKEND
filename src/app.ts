@@ -18,6 +18,10 @@ const app: Application = express();
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
+    // Diagnostic Logs
+    console.log(`🔍 [CORS Check] Incoming Origin: ${origin}`);
+    console.log(`🔍 [CORS Check] Configured CLIENT_URL: ${env.CLIENT_URL}`);
+
     // 1. Handle development/server-to-server requests (no origin)
     if (!origin) {
       return callback(null, true);
