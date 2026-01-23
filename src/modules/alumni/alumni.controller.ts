@@ -49,3 +49,15 @@ export const deleteAlumni = asyncHandler(async (req: Request, res: Response) => 
   
   successResponse(res, null, 'Alumni deleted successfully');
 });
+
+export const addAlumniFromUser = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  const alumni = await AlumniService.addAlumniFromUser(userId);
+  successResponse(res, alumni, 'Alumni added from user successfully', 201);
+});
+
+export const graduateSession = asyncHandler(async (req: Request, res: Response) => {
+  const { session } = req.body;
+  const result = await AlumniService.graduateSession(session);
+  successResponse(res, result, `All students from session ${session} are now alumni`);
+});

@@ -133,7 +133,10 @@ export const createNotice = async (data: any, files: Express.Multer.File[], user
   // Notify interested users
   const notificationResult = await notifyInterestedUsers('notice', notice.category, {
     title: notice.title,
-    id: (notice._id as any).toString()
+    id: (notice._id as any).toString(),
+    targetAudience: notice.targetAudience,
+    shouldSendEmail: notice.shouldSendEmail,
+    isImportant: notice.isImportant,
   });
 
   return {

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { AchievementCategory, NoticeCategory } from './content.types';
+import { AchievementCategory, NoticeCategory, TargetAudience } from './content.types';
 
 export interface IHeroSlide {
   _id?: string;
@@ -24,6 +24,9 @@ export interface INotice {
   publishDate: Date;
   expiryDate?: Date;
   isPinned: boolean;
+  isImportant: boolean;
+  targetAudience: TargetAudience;
+  shouldSendEmail: boolean;
   category: NoticeCategory;
   createdBy: Types.ObjectId;
   isDeleted: boolean;

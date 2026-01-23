@@ -2,8 +2,12 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler.util';
 import { successResponse } from '@/utils/response.util';
 import { User } from './user.schema';
-import { uploadToCloudinary, deleteFromCloudinary } from '@/utils/cloudinary.util';
+import { deleteFromCloudinary, uploadToCloudinary } from '@/utils/cloudinary.util';
 import { AppError } from '@/utils/errors';
+import { sendEmail } from '@/utils/email.util';
+import crypto from 'crypto';
+import { Student, Teacher } from './user.schema';
+import { UserRole } from './user.types';
 
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   const { email, role, status, limit = 50, page = 1 } = req.query;
@@ -65,6 +69,22 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
     }
   }
 
+  if (typeof updates.socialLinks === 'string') {
+    try {
+      updates.socialLinks = JSON.parse(updates.socialLinks);
+    } catch (e) {
+      console.error('Error parsing socialLinks:', e);
+    }
+  }
+
+  if (typeof updates.projectLinks === 'string') {
+    try {
+      updates.projectLinks = JSON.parse(updates.projectLinks);
+    } catch (e) {
+      console.error('Error parsing projectLinks:', e);
+    }
+  }
+
   // Handle profile image upload
   if (req.file) {
     console.log('📸 Uploading image...');
@@ -74,7 +94,7 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
 
   // Prevent updating sensitive fields
   const sanitizedUpdates: any = {};
-  const allowedFields = ['name', 'phone', 'profileImage', 'designation', 'researchInterests', 'publications', 'cgpa', 'notificationPreferences'];
+  const allowedFields = ['name', 'phone', 'profileImage', 'designation', 'researchInterests', 'publications', 'cgpa', 'notificationPreferences', 'socialLinks', 'projectLinks'];
   
   Object.keys(updates).forEach((key) => {
     if (allowedFields.includes(key)) {
@@ -115,4 +135,102 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   successResponse(res, null, 'User deleted successfully');
+});
+
+export const bulkCreateUsers = asyncHandler(async (req: Request, res: Response) => {
+  console.log('🚀 Bulk Create Request received:', req.body);
+  const { users, role } = req.body; // users is now array of strings (emails) or objects
+
+  if (!Array.isArray(users)) {
+    throw new AppError('Users must be an array', 400);
+  }
+
+  const calculateBatch = (year: number) => {
+    const batchNum = year - 1990;
+    const s = ["th", "st", "nd", "rd"];
+    const v = batchNum % 100;
+    return batchNum + (s[(v - 20) % 10] || s[v] || s[0]) + ' Batch';
+  };
+
+  const results = [];
+  for (const item of users) {
+    try {
+      const email = typeof item === 'string' ? item.trim() : item.email.trim();
+      if (!email) continue;
+
+      // Check if user already exists by email (bypassing filters like isDeleted)
+      const existingUserByEmail = await User.findOne({ email }).setOptions({ skipMiddleware: true });
+      if (existingUserByEmail) {
+        results.push({ email, success: false, error: 'User with this email already exists' });
+        continue;
+      }
+
+      const password = crypto.randomBytes(8).toString('hex');
+      let newUser;
+      
+      const baseData = {
+        name: 'New Student',
+        email: email,
+        password,
+        role: role || UserRole.STUDENT,
+        phone: '0000000000',
+        status: 'ACTIVE',
+        isEmailVerified: true,
+      };
+
+      if (role === UserRole.TEACHER) {
+        newUser = await Teacher.create({
+          ...baseData,
+          name: 'New Faculty',
+          designation: 'Lecturer',
+        });
+      } else {
+        // Extract ID from email: 2021331002@student.sust.edu -> 2021331002
+        const idMatch = email.match(/^(\d+)/);
+        const studentId = idMatch ? idMatch[1] : `S${Date.now()}`;
+
+        // Check if student already exists by studentId (bypassing filters)
+        const existingStudentById = await User.findOne({ studentId }).setOptions({ skipMiddleware: true });
+        if (existingStudentById) {
+          results.push({ email, success: false, error: `Student with ID ${studentId} already exists` });
+          continue;
+        }
+
+        const entryYear = parseInt(studentId.substring(0, 4)) || new Date().getFullYear();
+        const sessionStr = `${entryYear}-${(entryYear + 1).toString().slice(-2)}`;
+        const batchStr = calculateBatch(entryYear);
+
+        newUser = await Student.create({
+          ...baseData,
+          studentId,
+          batch: batchStr,
+          session: sessionStr,
+          enrollmentYear: entryYear,
+        });
+      }
+
+      // Send Email
+      await sendEmail({
+        to: email,
+        subject: 'SUST CSE Account Created',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; padding: 20px;">
+            <h2>Welcome to SUST CSE Dashboard</h2>
+            <p>An account has been created for you. Here are your credentials:</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Password:</strong> ${password}</p>
+            <p>Please login and change your password immediately.</p>
+            <a href="${process.env.FRONTEND_URL}/login" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 20px; text-decoration:none; border-radius:5px;">Login Now</a>
+          </div>
+        `
+      });
+
+      results.push({ email, success: true });
+    } catch (err: any) {
+      console.error('❌ Bulk Create Error for', item, ':', err);
+      results.push({ email: typeof item === 'string' ? item : (item as any).email, success: false, error: err.message });
+    }
+  }
+
+  successResponse(res, results, 'Bulk creation completed');
 });

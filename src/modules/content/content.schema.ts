@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { IAchievement, IHomePage, INotice } from './content.interface';
-import { AchievementCategory, NoticeCategory } from './content.types';
+import { AchievementCategory, NoticeCategory, TargetAudience } from './content.types';
 
 // HomePage Schema
 const heroSlideSchema = new Schema({
@@ -39,6 +39,13 @@ const noticeSchema = new Schema(
     publishDate: { type: Date, default: Date.now },
     expiryDate: { type: Date },
     isPinned: { type: Boolean, default: false },
+    isImportant: { type: Boolean, default: false },
+    targetAudience: {
+      type: String,
+      enum: Object.values(TargetAudience),
+      default: TargetAudience.BOTH,
+    },
+    shouldSendEmail: { type: Boolean, default: true },
     category: {
       type: String,
       enum: Object.values(NoticeCategory),

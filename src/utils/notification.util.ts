@@ -1,18 +1,36 @@
 import { User } from '@/modules/user/user.schema';
 import { sendEmail } from './email.util';
 import { env } from '@/config/env';
+import { TargetAudience } from '@/modules/content/content.types';
 
 export const notifyInterestedUsers = async (
   type: 'notice' | 'event',
   category: string,
-  contentData: { title: string; id: string }
+  contentData: { title: string; id: string; targetAudience?: TargetAudience; shouldSendEmail?: boolean; isImportant?: boolean }
 ) => {
-  console.log(`🔔 Notification Triggered: [${type.toUpperCase()}] Category: ${category}, Title: ${contentData.title}`);
+  console.log(`🔔 Notification Triggered: [${type.toUpperCase()}] Category: ${category}, Title: ${contentData.title}, Important: ${contentData.isImportant}`);
   try {
-    // Find users who have opted into this category
+    // If it's a notice and shouldSendEmail is false, we can skip the email process but maybe still log or something
+    if (type === 'notice' && contentData.shouldSendEmail === false) {
+      console.log('⏹️ Email notification skipped as per notice settings.');
+      return { success: 0, total: 0, notifiedEmails: [], status: 'skipped' };
+    }
+
+    // Find users who should receive this notification
     const filter: any = { isDeleted: false, isEmailVerified: true };
+    
     if (type === 'notice') {
-      filter['notificationPreferences.notices'] = category;
+      // If it's important, we bypass category preferences and send to ALL relevant users
+      if (!contentData.isImportant) {
+        filter['notificationPreferences.notices'] = category;
+      }
+      
+      // Filter by target audience
+      if (contentData.targetAudience === TargetAudience.STUDENT) {
+        filter.role = 'STUDENT';
+      } else if (contentData.targetAudience === TargetAudience.TEACHER) {
+        filter.role = 'TEACHER';
+      }
     } else {
       filter['notificationPreferences.events'] = category;
     }

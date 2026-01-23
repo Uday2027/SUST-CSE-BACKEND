@@ -18,6 +18,11 @@ export interface IUser {
     notices: string[];
     events: string[];
   };
+  socialLinks?: {
+    facebook?: string;
+    linkedin?: string;
+    instagram?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +33,11 @@ export interface IStudent extends IUser {
   session: string;
   cgpa?: number;
   enrollmentYear: number;
+  projectLinks?: {
+    github?: string;
+    liveLink?: string;
+  };
+  isAlumni: boolean;
 }
 
 export interface ITeacher extends IUser {

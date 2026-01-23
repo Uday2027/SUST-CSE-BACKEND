@@ -16,3 +16,8 @@ export enum AchievementCategory {
   CULTURAL = 'CULTURAL',
   OTHER = 'OTHER',
 }
+export enum TargetAudience {
+  STUDENT = 'STUDENT',
+  TEACHER = 'TEACHER',
+  BOTH = 'BOTH',
+}

@@ -43,6 +43,14 @@ const alumniSchema = new Schema<IAlumni, AlumniModel>(
       type: String,
       trim: true,
     },
+    facebook: {
+      type: String,
+      trim: true,
+    },
+    instagram: {
+      type: String,
+      trim: true,
+    },
     email: {
       type: String,
       trim: true,

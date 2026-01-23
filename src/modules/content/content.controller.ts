@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler.util';
 import { successResponse } from '@/utils/response.util';
 import * as ContentService from './content.service';
+import { User } from '../user/user.schema';
+import { UserRole } from '../user/user.types';
+import { sendEmail } from '@/utils/email.util';
 
 // HomePage
 export const getHomePage = asyncHandler(async (req: Request, res: Response) => {
@@ -18,8 +21,38 @@ export const updateHomePage = asyncHandler(async (req: Request, res: Response) =
 // Notices
 export const createNotice = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
-  const result = await ContentService.createNotice(req.body, (req.files as Express.Multer.File[]) || [], userId);
-  successResponse(res, result, 'Notice created successfully', 201);
+  const notice = await ContentService.createNotice(req.body, (req.files as Express.Multer.File[]) || [], userId);
+  
+  if (req.body.isImportant) {
+    // Send email to all students and teachers
+    const targetRoles = [UserRole.STUDENT, UserRole.TEACHER];
+    const users = await User.find({ role: { $in: targetRoles }, isDeleted: false, status: 'ACTIVE' }).select('email');
+    
+    const emails = users.map(u => u.email);
+    
+    // Send emails
+    for (const email of emails) {
+      try {
+        await sendEmail({
+          to: email,
+          subject: `IMPORTANT NOTICE: ${notice.title}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; padding: 20px;">
+              <h2 style="color: #ef4444;">Important Update</h2>
+              <h3>${notice.title}</h3>
+              <p>${notice.description.replace(/\n/g, '<br/>')}</p>
+              <hr/>
+              <p>You received this because it is marked as an important department update.</p>
+            </div>
+          `
+        });
+      } catch (err) {
+        console.error(`Failed to send important notice email to ${email}`, err);
+      }
+    }
+  }
+
+  successResponse(res, notice, 'Notice created successfully', 201);
 });
 
 export const getNotices = asyncHandler(async (req: Request, res: Response) => {

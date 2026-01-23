@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import * as AlumniController from './alumni.controller';
 import { auth } from '@/middleware/auth.middleware';
 import { upload } from '@/middleware/upload.middleware';
@@ -6,13 +6,17 @@ import { validate } from '@/middleware/validate.middleware';
 import { createAlumniSchema, updateAlumniSchema } from './alumni.validator';
 import { UserRole } from '@/modules/user/user.types';
 
-const router = express.Router();
+const router = Router();
 
 // Public routes
-router.get('/', AlumniController.getAllAlumni);
+router.post(
+  '/graduate-session',
+  auth(UserRole.ADMIN),
+  AlumniController.graduateSession
+);
+
 router.get('/:id', AlumniController.getAlumniById);
 
-// Admin routes
 router.post(
   '/',
   auth(UserRole.ADMIN),
@@ -34,5 +38,13 @@ router.delete(
   auth(UserRole.ADMIN),
   AlumniController.deleteAlumni
 );
+
+router.post(
+  '/add-from-user',
+  auth(UserRole.ADMIN),
+  AlumniController.addAlumniFromUser
+);
+
+router.get('/', AlumniController.getAllAlumni);
 
 export const AlumniRoutes = router;

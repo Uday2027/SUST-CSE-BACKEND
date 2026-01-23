@@ -11,6 +11,8 @@ export interface IAlumni {
   description: string;
   quotes: string;
   linkedIn?: string;
+  facebook?: string;
+  instagram?: string;
   email?: string;
   createdAt: Date;
   updatedAt: Date;

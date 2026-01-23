@@ -59,6 +59,11 @@ const userSchema = new Schema<IUser>(
       notices: { type: [String], default: [] },
       events: { type: [String], default: [] },
     },
+    socialLinks: {
+      facebook: { type: String, trim: true },
+      linkedin: { type: String, trim: true },
+      instagram: { type: String, trim: true },
+    },
   },
   {
     timestamps: true,
@@ -109,6 +114,14 @@ const studentSchema = new Schema<IStudent>({
   enrollmentYear: {
     type: Number,
     required: [true, 'Enrollment year is required'],
+  },
+  projectLinks: {
+    github: { type: String, trim: true },
+    liveLink: { type: String, trim: true },
+  },
+  isAlumni: {
+    type: Boolean,
+    default: false,
   },
 });
 

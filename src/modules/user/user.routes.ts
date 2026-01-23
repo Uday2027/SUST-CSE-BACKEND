@@ -12,6 +12,12 @@ router.get(
   UserController.getAllUsers
 );
 
+router.post(
+  '/bulk-create',
+  auth(UserRole.ADMIN),
+  UserController.bulkCreateUsers
+);
+
 router.patch(
   '/:id/status',
   auth(UserRole.ADMIN),
