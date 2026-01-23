@@ -1,8 +1,9 @@
-// Force restart -v7
+// Force restart -v8
+import path from 'path';
 import { register } from 'tsconfig-paths';
 
 register({
-  baseUrl: './',
+  baseUrl: path.resolve(__dirname, '../'),
   paths: { '@/*': ['src/*'] }
 });
 
