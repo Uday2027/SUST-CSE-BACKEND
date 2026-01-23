@@ -18,10 +18,13 @@ const app: Application = express();
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = env.CLIENT_URL.split(',');
-    if (!origin || allowedOrigins.includes(origin)) {
+    const allowedOrigins = env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/$/, ''));
+    const sanitizedOrigin = origin ? origin.replace(/\/$/, '') : '';
+    
+    if (!origin || allowedOrigins.includes(sanitizedOrigin)) {
       callback(null, true);
     } else {
+      console.warn(`⚠️ CORS blocked for origin: ${origin}. Allowed: ${env.CLIENT_URL}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
