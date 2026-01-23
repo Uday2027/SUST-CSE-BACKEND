@@ -91,3 +91,12 @@ export const getAchievementById = asyncHandler(async (req: Request, res: Respons
   const result = await ContentService.getAchievementById(req.params.id as string);
   successResponse(res, result, 'Achievement details fetched successfully');
 });
+
+// Admin Messenger
+export const sendMessage = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+  const { title, content, target, methods } = req.body;
+  
+  const result = await ContentService.sendMessage({ title, content, target, methods }, userId);
+  successResponse(res, result, 'Message process completed');
+});

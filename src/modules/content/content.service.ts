@@ -2,6 +2,8 @@ import { HomePage, Notice, Achievement } from './content.schema';
 import { uploadToCloudinary } from '../../utils/cloudinary.util';
 import { Types } from 'mongoose';
 import { NotFoundError } from '../../utils/errors';
+import { User } from '../user/user.schema';
+import { sendEmail } from '../../utils/email.util';
 import { notifyInterestedUsers } from '../../utils/notification.util';
 
 // HomePage
@@ -180,7 +182,65 @@ export const deleteAchievement = async (id: string) => {
 };
 
 export const getAchievementById = async (id: string) => {
-  const achievement = await Achievement.findById(id).populate('achievedBy', 'name email profileImage').populate('createdBy', 'name email');
-  if (!achievement) throw new NotFoundError('Achievement not found');
-  return achievement;
+  return Achievement.findById(id);
+};
+
+// Admin Messenger Logic
+export const sendMessage = async (
+  data: { title: string; content: string; target: string; methods: string[] },
+  adminId: string
+) => {
+  const { title, content, target, methods } = data;
+  const results: any = { email: null, notice: null };
+
+  // 1. Target Filtering
+  const filter: any = { isDeleted: false, status: 'ACTIVE' };
+  if (target === 'STUDENT' || target === 'TEACHER') {
+    filter.role = target;
+  }
+
+  const users = await User.find(filter).select('email name');
+
+  // 2. Direct Email
+  if (methods.includes('EMAIL')) {
+    const emailResults = await Promise.allSettled(
+      users.map((u: any) => 
+        sendEmail({
+          to: u.email,
+          subject: title,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+              <h2 style="color: #002147;">Department Message</h2>
+              <p>Hello ${u.name},</p>
+              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">${title}</h3>
+                <p style="white-space: pre-wrap;">${content}</p>
+              </div>
+              <p style="color: #64748b; font-size: 0.8rem;">Sent by SUST CSE Administration</p>
+            </div>
+          `
+        })
+      )
+    );
+    results.email = {
+      total: users.length,
+      success: emailResults.filter((r: any) => r.status === 'fulfilled').length
+    };
+  }
+
+  // 3. Portal Notice
+  if (methods.includes('NOTICE')) {
+    const notice = await Notice.create({
+      title,
+      description: content,
+      category: 'ADMINISTRATIVE',
+      targetAudience: target === 'BOTH' ? 'BOTH' : target,
+      createdBy: adminId,
+      isImportant: true,
+      shouldSendEmail: false // We already handled emails if checked
+    });
+    results.notice = notice;
+  }
+
+  return results;
 };

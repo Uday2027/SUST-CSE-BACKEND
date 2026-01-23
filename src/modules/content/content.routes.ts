@@ -50,4 +50,6 @@ router.delete(
   ContentController.deleteAchievement
 );
 
+router.post('/send-message', auth(UserRole.ADMIN), ContentController.sendMessage);
+
 export const ContentRoutes = router;
