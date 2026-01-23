@@ -18,10 +18,22 @@ const app: Application = express();
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/$/, ''));
-    const sanitizedOrigin = origin ? origin.replace(/\/$/, '') : '';
-    
-    if (!origin || allowedOrigins.includes(sanitizedOrigin)) {
+    // 1. Handle development/server-to-server requests (no origin)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // 2. Parse the allowed origins from your env string
+    // This turns "https://example.com, https://api.example.com" into an array
+    const allowedOrigins = env.CLIENT_URL
+      ? env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/$/, ''))
+      : [];
+
+    // 3. Sanitize the incoming origin (remove trailing slashes)
+    const sanitizedOrigin = origin.replace(/\/$/, '');
+
+    // 4. Check if the origin is in our allowed list
+    if (allowedOrigins.includes(sanitizedOrigin)) {
       callback(null, true);
     } else {
       console.warn(`⚠️ CORS blocked for origin: ${origin}. Allowed: ${env.CLIENT_URL}`);
