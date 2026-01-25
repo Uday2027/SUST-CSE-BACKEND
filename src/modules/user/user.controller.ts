@@ -319,3 +319,24 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
 
   successResponse(res, { users, total }, 'Student list fetched successfully');
 });
+
+// Get Single Public Profile
+export const getUserById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const user = await User.findById(id).select('-password -__v -verificationCode -verificationCodeExpires');
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  // Filter out sensitive data if needed, but select exclusion covers most
+  // If user is pending or deleted, maybe hide? 
+  if (user.isDeleted || user.status !== 'ACTIVE') {
+     // Allow Admin to see? For now public endpoint, restriction applies
+     // But wait, "Students full profile will show when student become faculty" -> legacy data?
+     // Let's stick to standard visibility constraints
+     throw new AppError('User profile not available', 404);
+  }
+
+  successResponse(res, user, 'User profile fetched successfully');
+});
