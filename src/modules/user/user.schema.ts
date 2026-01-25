@@ -37,24 +37,25 @@ const userSchema = new Schema<IUser>(
     status: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.ACTIVE,
+      default: UserStatus.PENDING,
     },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    verificationCode: {
-      type: String,
-      select: false,
-    },
-    verificationCodeExpires: {
-      type: Date,
-      select: false,
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
+    // ... (rest of status block is separate in file, checking context)
+    experiences: [{
+      title: { type: String, trim: true },
+      company: { type: String, trim: true },
+      location: { type: String, trim: true },
+      startDate: Date,
+      endDate: Date,
+      current: { type: Boolean, default: false },
+      description: String,
+    }],
+    researches: [{
+      title: { type: String, trim: true },
+      publicationLink: { type: String, trim: true },
+      journal: { type: String, trim: true },
+      publicationDate: Date,
+      description: String,
+    }],
     notificationPreferences: {
       notices: { type: [String], default: [] },
       events: { type: [String], default: [] },

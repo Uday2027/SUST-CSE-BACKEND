@@ -25,6 +25,22 @@ export interface IUser {
     instagram?: string;
     website?: string;
   };
+  experiences?: {
+    title: string;
+    company: string;
+    location?: string;
+    startDate: Date;
+    endDate?: Date;
+    current: boolean;
+    description?: string;
+  }[];
+  researches?: {
+    title: string;
+    publicationLink?: string;
+    journal?: string;
+    publicationDate?: Date;
+    description?: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -18,10 +18,27 @@ router.post(
   UserController.bulkCreateUsers
 );
 
+router.get(
+  '/faculty',
+  UserController.getFaculty
+);
+
+router.get(
+  '/students',
+  auth(),
+  UserController.getStudents
+);
+
 router.patch(
   '/:id/status',
   auth(UserRole.ADMIN),
   UserController.updateUserStatus
+);
+
+router.patch(
+  '/:id',
+  auth(UserRole.ADMIN),
+  UserController.updateUser
 );
 
 router.patch(

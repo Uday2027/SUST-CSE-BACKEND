@@ -93,6 +93,22 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
     }
   }
 
+  if (typeof updates.experiences === 'string') {
+    try {
+      updates.experiences = JSON.parse(updates.experiences);
+    } catch (e) {
+      console.error('Error parsing experiences:', e);
+    }
+  }
+
+  if (typeof updates.researches === 'string') {
+    try {
+      updates.researches = JSON.parse(updates.researches);
+    } catch (e) {
+      console.error('Error parsing researches:', e);
+    }
+  }
+
   // Handle profile image upload
   if (req.file) {
     console.log('📸 Uploading image...');
@@ -102,7 +118,7 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
 
   // Prevent updating sensitive fields
   const sanitizedUpdates: any = {};
-  const allowedFields = ['name', 'phone', 'profileImage', 'designation', 'researchInterests', 'publications', 'cgpa', 'notificationPreferences', 'socialLinks', 'projectLinks', 'projects', 'studentId', 'batch', 'session'];
+  const allowedFields = ['name', 'phone', 'profileImage', 'designation', 'researchInterests', 'publications', 'cgpa', 'notificationPreferences', 'socialLinks', 'projectLinks', 'projects', 'experiences', 'researches', 'studentId', 'batch', 'session'];
   
   Object.keys(updates).forEach((key) => {
     if (allowedFields.includes(key)) {
@@ -131,6 +147,26 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
 
   console.log('✅ Update successful for:', updatedUser.email);
   successResponse(res, updatedUser, 'Profile updated successfully');
+});
+
+export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  // Handle nested objects that might be stringified in FormData (optional depends on how frontend sends it)
+  // For simplicitly, assume JSON for admin update
+  
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { $set: updates },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new AppError('User not found', 404);
+  }
+
+  successResponse(res, updatedUser, 'User updated successfully');
 });
 
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
@@ -241,4 +277,36 @@ export const bulkCreateUsers = asyncHandler(async (req: Request, res: Response) 
   }
 
   successResponse(res, results, 'Bulk creation completed');
+});
+
+// Get Public Faculty List
+export const getFaculty = asyncHandler(async (req: Request, res: Response) => {
+  const users = await User.find({ role: UserRole.TEACHER, status: 'ACTIVE', isDeleted: false })
+    .select('name email role designation profileImage researchInterests publications experiences researches socialLinks')
+    .sort({ createdAt: 1 }); // Or by designation rank if logic existed
+
+  successResponse(res, users, 'Faculty list fetched successfully');
+});
+
+// Get Students List (Protected)
+export const getStudents = asyncHandler(async (req: Request, res: Response) => {
+  const { limit = 50, page = 1, search } = req.query;
+  const filter: any = { role: UserRole.STUDENT, status: 'ACTIVE', isDeleted: false };
+
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { studentId: { $regex: search, $options: 'i' } }
+    ];
+  }
+
+  const users = await User.find(filter)
+    .select('name email role studentId batch session profileImage projects experiences researches socialLinks')
+    .sort({ studentId: 1 })
+    .limit(Number(limit))
+    .skip((Number(page) - 1) * Number(limit));
+
+  const total = await User.countDocuments(filter);
+
+  successResponse(res, { users, total }, 'Student list fetched successfully');
 });
