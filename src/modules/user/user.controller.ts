@@ -329,19 +329,22 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
     throw new AppError('Invalid User ID format', 400);
   }
 
-  const user = await User.findById(id).select('-password -__v -verificationCode -verificationCodeExpires');
+  // Bypass middleware to check if user exists at all (even if deleted)
+  const user = await User.findById(id).select('-password -__v -verificationCode -verificationCodeExpires').setOptions({ skipMiddleware: true });
 
   if (!user) {
+    console.log(`❌ User ${id} not found in DB`);
     throw new AppError('User not found', 404);
   }
 
-  // Filter out sensitive data if needed, but select exclusion covers most
-  // If user is pending or deleted, maybe hide? 
-  if (user.isDeleted || user.status !== 'ACTIVE') {
-     // Allow Admin to see? For now public endpoint, restriction applies
-     // But wait, "Students full profile will show when student become faculty" -> legacy data?
-     // Let's stick to standard visibility constraints
-     throw new AppError('User profile not available', 404);
+  if (user.isDeleted) {
+    console.log(`⚠️ User ${id} is deleted`);
+    throw new AppError('User profile no longer exists', 410); // Gone
+  }
+
+  if (user.status !== 'ACTIVE') {
+    console.log(`⚠️ User ${id} is inactive (Status: ${user.status})`);
+    throw new AppError('User profile is pending approval or suspended', 403);
   }
 
   successResponse(res, user, 'User profile fetched successfully');
