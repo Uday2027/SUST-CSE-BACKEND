@@ -67,6 +67,22 @@ const userSchema = new Schema<IUser>(
       instagram: { type: String, trim: true },
       website: { type: String, trim: true },
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
+      select: false,
+    },
+    verificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
