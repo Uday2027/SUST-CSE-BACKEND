@@ -128,25 +128,22 @@ export const updateMyProfile = asyncHandler(async (req: Request, res: Response) 
 
   console.log('📝 Updates to apply:', JSON.stringify(sanitizedUpdates));
 
-  // Use findByIdAndUpdate with explicit string ID to avoid any casting issues
-  const updatedUser = await User.findByIdAndUpdate(
-    user._id.toString(),
-    { $set: sanitizedUpdates },
-    { new: true, runValidators: true }
-  );
+  // Use save() instead of findByIdAndUpdate to ensure discriminator fields (batch, session) are handled correctly
+  const currentUser = await User.findById(user._id);
 
-  if (!updatedUser) {
-    console.error('❌ User not found in DB with ID:', user._id.toString());
-    // Try one more time bypassing filters
-    const rawUser = await User.findOne({ _id: user._id }).setOptions({ skipMiddleware: true });
-    if (rawUser) {
-      console.log('⚠️ User found only when bypassing middleware!');
-    }
+  if (!currentUser) {
     throw new AppError('User not found in database', 404);
   }
 
-  console.log('✅ Update successful for:', updatedUser.email);
-  successResponse(res, updatedUser, 'Profile updated successfully');
+  // Apply updates
+  Object.keys(sanitizedUpdates).forEach((key) => {
+    (currentUser as any)[key] = sanitizedUpdates[key];
+  });
+
+  await currentUser.save();
+  
+  console.log('✅ Update successful for:', currentUser.email);
+  successResponse(res, currentUser, 'Profile updated successfully');
 });
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
