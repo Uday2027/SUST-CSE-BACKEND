@@ -15,9 +15,9 @@ export const registerStudent = async (data: any) => {
   const existingEmail = await User.findOne({ email: data.email });
   if (existingEmail) {
     if (!existingEmail.isEmailVerified) {
-       throw new ConflictError('User with this email already exists. Please check your email for verification code.');
+       throw new ConflictError('User with this email already exists but is not verified. Please check your email for the verification code.');
     }
-    throw new ConflictError('User with this email already exists');
+    throw new ConflictError('User with this email already exists. If you have forgotten your password or were added by an admin, please use the "Forgot Password" feature on the login page.');
   }
 
   // Check student ID uniqueness if provided - Check base User to catch all discriminators
@@ -58,7 +58,7 @@ export const registerStudent = async (data: any) => {
 export const registerTeacher = async (data: any) => {
   const isExist = await User.findOne({ email: data.email });
   if (isExist) {
-    throw new ConflictError('User with this email already exists');
+    throw new ConflictError('User with this email already exists. If you have forgotten your password or were added by an admin, please use the "Forgot Password" feature on the login page.');
   }
 
   const verificationCode = generateVerificationCode();
@@ -138,16 +138,13 @@ export const verifyEmail = async (email: string, code: string) => {
     throw new AppError('No verification code found. Please request a new one.', 400);
   }
 
-  console.log(`📊 DB Code: ${user.verificationCode}, Input Code: ${code}`);
-  console.log(`⏰ Code Expires: ${user.verificationCodeExpires}, Current Time: ${new Date()}`);
-
   if (user.verificationCodeExpires < new Date()) {
     console.warn(`❌ Verification failed: Code expired for ${email}`);
     throw new AppError('Verification code has expired. Please request a new one.', 400);
   }
 
   if (user.verificationCode !== code) {
-    console.warn(`❌ Verification failed: Code mismatch for ${email}. Expected ${user.verificationCode}, got ${code}`);
+    console.warn(`❌ Verification failed: Code mismatch for ${email}`);
     throw new AppError('Invalid verification code', 400);
   }
 

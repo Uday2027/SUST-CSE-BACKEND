@@ -4,6 +4,8 @@ import { asyncHandler } from '../../utils/asyncHandler.util';
 import { successResponse } from '../../utils/response.util';
 import { uploadToCloudinary } from '../../utils/cloudinary.util';
 import { AppError } from '../../utils/errors';
+import { sendEmail } from '../../utils/email.util';
+import { BlogStatus } from './blog.interface';
 
 export const createBlog = asyncHandler(async (req: Request, res: Response) => {
   let imageUrl = '';
@@ -55,8 +57,48 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const verifyBlog = asyncHandler(async (req: Request, res: Response) => {
-  const blog = await BlogService.verifyBlog(req.params.id as string, req.body.status);
-  successResponse(res, blog, `Blog post ${req.body.status.toLowerCase()} successfully`);
+  const id = req.params.id as string;
+  const { status } = req.body;
+
+  const blog = await BlogService.verifyBlog(id, status);
+  if (!blog) {
+    throw new AppError('Blog post not found', 404);
+  }
+
+  // Send notification if blog is published
+  if (status === BlogStatus.PUBLISHED) {
+    try {
+      // Re-fetch with author populated if it exists
+      const populatedBlog = await blog.populate('author', 'name email');
+      const authorEmail = populatedBlog.author ? (populatedBlog.author as any).email : populatedBlog.guestEmail;
+      const authorName = populatedBlog.author ? (populatedBlog.author as any).name : populatedBlog.guestName || 'Contributor';
+
+      if (authorEmail) {
+        await sendEmail({
+          to: authorEmail,
+          subject: 'Your Blog Post has been Published! - SUST CSE Dashboard',
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; padding: 20px;">
+              <h2 style="color: #16a34a;">Congratulations!</h2>
+              <p>Hello ${authorName},</p>
+              <p>We are pleased to inform you that your blog post <strong>"${blog.title}"</strong> has been approved and published on the SUST CSE Dashboard.</p>
+              <p>You can view it here:</p>
+              <div style="margin: 30px 0;">
+                <a href="${process.env.CLIENT_URL}/blogs/${blog._id}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">View Your Post</a>
+              </div>
+              <p>Thank you for contributing to our community!</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="color: #666; font-size: 12px;">SUST CSE Department</p>
+            </div>
+          `
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send blog approval email:', emailError);
+    }
+  }
+
+  successResponse(res, blog, `Blog post ${status.toLowerCase()} successfully`);
 });
 
 export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
