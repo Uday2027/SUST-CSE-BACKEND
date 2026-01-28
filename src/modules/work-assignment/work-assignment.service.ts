@@ -5,8 +5,19 @@ import { User } from '../user/user.schema';
 import { sendEmail } from '../../utils/email.util';
 import { AppError } from '../../utils/errors';
 import { Types } from 'mongoose';
+import { validateAssignmentHierarchy } from '../../utils/hierarchy.util';
+import { UserRole } from '../user/user.types';
 
-export const createWorkAssignment = async (data: Partial<IWorkAssignment>) => {
+export const createWorkAssignment = async (data: Partial<IWorkAssignment>, assignerRole?: string) => {
+  // If not global admin, validate hierarchy
+  if (assignerRole !== UserRole.ADMIN && data.assignedBy && data.assignedTo && data.society) {
+    await validateAssignmentHierarchy(
+      data.assignedBy.toString(),
+      data.assignedTo.toString(),
+      data.society.toString()
+    );
+  }
+
   const assignment = await WorkAssignment.create(data);
 
   // Populate user and society for email

@@ -5,6 +5,7 @@ import { createEventSchema, updateEventSchema } from './event.validator';
 import { auth } from '../../middleware/auth.middleware';
 import { UserRole } from '../../modules/user/user.types';
 import { upload } from '../../middleware/upload.middleware';
+import { UserPermission } from '../user/user.interface';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get('/:id', EventController.getEventById);
 
 router.post(
   '/',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_EVENTS]),
   upload.fields([
     { name: 'images', maxCount: 10 },
     { name: 'attachments', maxCount: 10 }
@@ -26,7 +27,7 @@ router.post(
 
 router.put(
   '/:id',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_EVENTS]),
   upload.fields([
     { name: 'images', maxCount: 10 },
     { name: 'attachments', maxCount: 10 }
@@ -37,7 +38,7 @@ router.put(
 
 router.delete(
   '/:id',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_EVENTS]),
   EventController.deleteEvent
 );
 

@@ -5,6 +5,7 @@ import { homePageSchema, noticeSchema, achievementSchema } from './content.valid
 import { auth } from '../../middleware/auth.middleware';
 import { UserRole } from '../../modules/user/user.types';
 import { upload } from '../../middleware/upload.middleware';
+import { UserPermission } from '../user/user.interface';
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const router = express.Router();
 router.get('/homepage', ContentController.getHomePage);
 router.put(
   '/homepage',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_CONTENT]),
   upload.array('heroImages', 5),
   validate(homePageSchema),
   ContentController.updateHomePage
@@ -23,14 +24,14 @@ router.get('/notices', ContentController.getNotices);
 router.get('/notices/:id', ContentController.getNoticeById);
 router.post(
   '/notices',
-  auth([UserRole.ADMIN, UserRole.STUDENT]),
+  auth([UserRole.ADMIN, UserRole.STUDENT, UserRole.TEACHER], [UserPermission.MANAGE_NOTICES]),
   upload.array('attachments', 5),
   validate(noticeSchema),
   ContentController.createNotice
 );
 router.delete(
   '/notices/:id',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_NOTICES, UserPermission.MANAGE_CONTENT]),
   ContentController.deleteNotice
 );
 
@@ -39,14 +40,14 @@ router.get('/achievements', ContentController.getAchievements);
 router.get('/achievements/:id', ContentController.getAchievementById);
 router.post(
   '/achievements',
-  auth([UserRole.ADMIN, UserRole.TEACHER]),
+  auth([UserRole.ADMIN, UserRole.TEACHER], [UserPermission.MANAGE_ACHIEVEMENTS]),
   upload.array('images', 5),
   validate(achievementSchema),
   ContentController.createAchievement
 );
 router.delete(
   '/achievements/:id',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_ACHIEVEMENTS, UserPermission.MANAGE_CONTENT]),
   ContentController.deleteAchievement
 );
 

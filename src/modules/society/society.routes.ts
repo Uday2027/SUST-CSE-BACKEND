@@ -5,6 +5,7 @@ import { createSocietySchema, addMemberSchema, updateSocietySchema, updateMember
 import { auth } from '../../middleware/auth.middleware';
 import { UserRole } from '../../modules/user/user.types';
 import { upload } from '../../middleware/upload.middleware';
+import { UserPermission } from '../user/user.interface';
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get('/:id', SocietyController.getSocietyById);
 
 router.post(
   '/',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_SOCIETIES]),
   upload.single('logo'),
   validate(createSocietySchema),
   SocietyController.createSociety
@@ -22,7 +23,7 @@ router.post(
 
 router.patch(
   '/:id',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_SOCIETIES]),
   upload.single('logo'),
   validate(updateSocietySchema),
   SocietyController.updateSociety
@@ -32,7 +33,7 @@ router.patch(
 router.get('/:id/members', SocietyController.getMembers);
 router.post(
   ('/:id/members'),
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_SOCIETIES]),
   upload.single('image'), // Enable image upload
   validate(addMemberSchema),
   SocietyController.addMember
@@ -40,14 +41,14 @@ router.post(
 
 router.patch(
   '/members/:memberId',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_SOCIETIES]),
   validate(updateMemberSchema),
   SocietyController.updateMember
 );
 
 router.delete(
   '/members/:memberId',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_SOCIETIES]),
   SocietyController.removeMember
 );
 

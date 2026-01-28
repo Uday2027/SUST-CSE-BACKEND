@@ -5,6 +5,7 @@ import { createCourseSchema, updateCourseSchema, createAcademicAchievementSchema
 import { auth } from '../../middleware/auth.middleware';
 import { UserRole } from '../../modules/user/user.types';
 import { upload } from '../../middleware/upload.middleware';
+import { UserPermission } from '../user/user.interface';
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const router = express.Router();
 router.get('/courses', AcademicController.getCourses);
 router.post(
   '/courses',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_CONTENT]),
   validate(createCourseSchema),
   AcademicController.createCourse
 );
@@ -32,7 +33,7 @@ router.delete(
 router.get('/achievements', AcademicController.getAchievements);
 router.post(
   '/achievements',
-  auth([UserRole.ADMIN, UserRole.TEACHER]),
+  auth([UserRole.ADMIN, UserRole.TEACHER], [UserPermission.MANAGE_ACHIEVEMENTS]),
   upload.array('attachments', 5),
   validate(createAcademicAchievementSchema),
   AcademicController.createAchievement
@@ -42,7 +43,7 @@ router.post(
 router.get('/stats', AcademicController.getStats);
 router.post(
   '/stats',
-  auth(UserRole.ADMIN),
+  auth([UserRole.ADMIN], [UserPermission.MANAGE_CONTENT]),
   validate(createStatSchema),
   AcademicController.updateStat
 );

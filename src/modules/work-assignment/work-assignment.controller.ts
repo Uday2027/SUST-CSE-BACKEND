@@ -9,7 +9,7 @@ export const createAssignment = asyncHandler(async (req: Request, res: Response)
   const result = await WorkAssignmentService.createWorkAssignment({
     ...req.body,
     assignedBy: adminId,
-  });
+  }, (req as any).user.role);
   successResponse(res, result, 'Work assigned successfully', 201);
 });
 
